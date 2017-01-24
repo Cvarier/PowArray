@@ -4,4 +4,4 @@ Please see my blog at https://chaitanyavarier.com/2015/08/03/the-little-array-th
 
 ## Open-Source
 Note that this software is licensed under the MIT public license, meaning that this software is open-source. Please disregard the EULA
-embedded in the software, it is inactive.
+embedded in the software as it is inactive.

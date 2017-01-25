@@ -6,744 +6,681 @@ import java.util.List;
 
 public class LargePowerCalc {
 
-	private static boolean notStopped = true;
-	private static boolean isPaused = false;
-	private static List<Long> pauseTimes;
-	private static List<Long> resumeTimes;
+    private static boolean notStopped = true;
+    private static boolean isPaused = false;
+    private static List<Long> pauseTimes;
+    private static List<Long> resumeTimes;
 
-	public static void exponentiate(int x, int n) {
+    public static void exponentiate(int x, int n) {
 
-		try {
+        try {
 
-			// For subtracting pause and resume intervals from runtime
-			pauseTimes = new ArrayList<Long>();
-			resumeTimes = new ArrayList<Long>();
+            // For subtracting pause and resume intervals from runtime
+            pauseTimes = new ArrayList<Long>();
+            resumeTimes = new ArrayList<Long>();
 
-			int i = 0;
+            int i = 0;
 
-			// Calculate # digits in number
-			int digitsFinal = (int) Math.floor(n * Math.log10(x) + 1);
+            // Calculate # digits in number
+            int digitsFinal = (int) Math.floor(n * Math.log10(x) + 1);
 
-			// ------------Print the number of digits in x^n--------------------
+            // ------------Print the number of digits in x^n--------------------
 
-			List<Byte> ndigits = new ArrayList<Byte>();
-			int ncopy = n;
+            List<Byte> ndigits = new ArrayList<Byte>();
+            int ncopy = n;
 
-			while (ncopy > 0) {
+            while (ncopy > 0) {
 
-				ndigits.add((byte) (ncopy % 10));
-				ncopy /= 10;
+                ndigits.add((byte) (ncopy % 10));
+                ncopy /= 10;
 
-			}
+            }
 
-			Collections.reverse(ndigits);
+            Collections.reverse(ndigits);
 
-			System.out.print("The number of digits in " + x);
+            System.out.print("The number of digits in " + x);
 
-			for (int z : ndigits) {
+            for (int z : ndigits) {
 
-				if (z == 0) {
+                if (z == 0) {
 
-					System.out.print("'");
+                    System.out.print("'");
 
-				} else if (z == 1) {
+                } else if (z == 1) {
 
-					System.out.print("¹");
+                    System.out.print("¹");
 
-				} else if (z == 2) {
+                } else if (z == 2) {
 
-					System.out.print("²");
+                    System.out.print("²");
 
-				} else if (z == 3) {
+                } else if (z == 3) {
 
-					System.out.print("³");
+                    System.out.print("³");
 
-				} else if (z == 4) {
+                } else if (z == 4) {
 
-					System.out.print("!");
+                    System.out.print("!");
 
-				} else if (z == 5) {
+                } else if (z == 5) {
 
-					System.out.print("\"");
+                    System.out.print("\"");
 
-				} else if (z == 6) {
+                } else if (z == 6) {
 
-					System.out.print("#");
+                    System.out.print("#");
 
-				} else if (z == 7) {
+                } else if (z == 7) {
 
-					System.out.print("$");
+                    System.out.print("$");
 
-				} else if (z == 8) {
+                } else if (z == 8) {
 
-					System.out.print("%");
+                    System.out.print("%");
 
-				} else {
+                } else {
 
-					System.out.print("&");
+                    System.out.print("&");
 
-				}
+                }
 
-			}
+            }
 
-			System.out.print(" is " + digitsFinal + " digits");
-			System.out.println();
-			System.out.println();
+            System.out.print(" is " + digitsFinal + " digits");
+            System.out.println();
+            System.out.println();
 
-			// ------------------------------------------------------------
+            // ------------------------------------------------------------
 
-			byte[] finalprod = new byte[digitsFinal + 5];
-			finalprod[finalprod.length - 1] = 1;
-			int digprod = 0;
-			int carryover = 0;
-			// int zerocount = 0;
-			i = finalprod.length - 1;
+            byte[] finalprod = new byte[digitsFinal + 5];
+            finalprod[finalprod.length - 1] = 1;
+            int digprod = 0;
+            int carryover = 0;
+            // int zerocount = 0;
+            i = finalprod.length - 1;
 
-			int curind = 0;
+            int curind = 0;
 
-			int digits = 0;
-			List<Byte> digarray = new ArrayList<Byte>();
+            int digits = 0;
+            List<Byte> digarray = new ArrayList<Byte>();
 
-			// Store how many factors of 10 base x has, store it in facTens and
-			// strip x of its trailing zeroes
-			int facTens = 0;
-			int xcopy = x;
-
-			while (x % 10 == 0) {
-
-				facTens++;
-				x /= 10;
-
-			}
-			/*
-			 * // ---------------Optimization Algorithm v 1.0 goes
-			 * here:----------
-			 * 
-			 * // Check if x^n > 10 digits in length, and only execute
-			 * optimization // if it is
-			 * 
-			 * boolean needsOptimization = false; boolean optimized = false;
-			 * 
-			 * int nr = 0; int xOld = 0; int nOld = n; int xr = 0;
-			 * 
-			 * if (digitsFinal > 10 && Math.log10(x) != (int) Math.log10(x)) {
-			 * 
-			 * needsOptimization = true; int maxpow = 1;
-			 * 
-			 * while (true) {
-			 * 
-			 * if ((long) Math.pow(x, maxpow) < (long) Math.pow(2, 20) && (long)
-			 * Math.pow(x, maxpow + 1) < (long) Math.pow(2, 20)) { maxpow++; }
-			 * else { break; }
-			 * 
-			 * }
-			 * 
-			 * // store the current value of x xOld = x;
-			 * 
-			 * // change the value of x to the highest power of x that is less
-			 * // than 2^20 x = (int) Math.pow(x, maxpow);
-			 * 
-			 * // calculate the new value of n n = n / maxpow;
-			 * 
-			 * // get the remaining factors of xOld nr = nOld % maxpow;
-			 * 
-			 * // store remaining factors of xOld in one int xr = (int)
-			 * Math.pow(xOld, nr);
-			 * 
-			 * }
-			 * 
-			 * // ---------------Optimization Algorithm ends
-			 * here------------------
-			 */
-
-			// Get the starting epoch time
-			long startTime = System.currentTimeMillis();
-
-			// If x^n does not only contain powers of 10, execute main algorithm
-			if (Math.log10(x) != (int) Math.log10(x)) {
-
-				// For Adding Lines in Multi-Digit Multiplication
-				int sumcarry = 0;
-				int digsum = 0;
-				// boolean zerook = false;
-
-				// Getting number of digits in curind
-				curind = x;
-
-				while (curind > 0) {
-
-					digarray.add((byte) (curind % 10));
-					curind /= 10;
-					digits++;
+            // Store how many factors of 10 base x has, store it in facTens and
+            // strip x of its trailing zeroes
+            int facTens = 0;
+            int xcopy = x;
+
+            while (x % 10 == 0) {
 
-				}
+                facTens++;
+                x /= 10;
 
-				Collections.reverse(digarray);
-				curind = x;
+            }
+            /*
+             * // ---------------Optimization Algorithm v 1.0 goes
+             * here:----------
+             * 
+             * // Check if x^n > 10 digits in length, and only execute
+             * optimization // if it is
+             * 
+             * boolean needsOptimization = false; boolean optimized = false;
+             * 
+             * int nr = 0; int xOld = 0; int nOld = n; int xr = 0;
+             * 
+             * if (digitsFinal > 10 && Math.log10(x) != (int) Math.log10(x)) {
+             * 
+             * needsOptimization = true; int maxpow = 1;
+             * 
+             * while (true) {
+             * 
+             * if ((long) Math.pow(x, maxpow) < (long) Math.pow(2, 20) && (long)
+             * Math.pow(x, maxpow + 1) < (long) Math.pow(2, 20)) { maxpow++; }
+             * else { break; }
+             * 
+             * }
+             * 
+             * // store the current value of x xOld = x;
+             * 
+             * // change the value of x to the highest power of x that is less
+             * // than 2^20 x = (int) Math.pow(x, maxpow);
+             * 
+             * // calculate the new value of n n = n / maxpow;
+             * 
+             * // get the remaining factors of xOld nr = nOld % maxpow;
+             * 
+             * // store remaining factors of xOld in one int xr = (int)
+             * Math.pow(xOld, nr);
+             * 
+             * }
+             * 
+             * // ---------------Optimization Algorithm ends
+             * here------------------
+             */
 
-				for (int mainind = 0; mainind < n; mainind++) {
+            // Get the starting epoch time
+            long startTime = System.currentTimeMillis();
 
-					if (notStopped) {
+            // If x^n does not only contain powers of 10, execute main algorithm
+            if (Math.log10(x) != (int) Math.log10(x)) {
 
-						// Pause/Resume Calculation
+                // For Adding Lines in Multi-Digit Multiplication
+                int sumcarry = 0;
+                int digsum = 0;
+                // boolean zerook = false;
 
-						while (isPaused) {
+                // Getting number of digits in curind
+                curind = x;
 
-							Thread.sleep(100);
+                while (curind > 0) {
 
-						}
+                    digarray.add((byte) (curind % 10));
+                    curind /= 10;
+                    digits++;
 
-						byte[][] lines = new byte[digits][finalprod.length]; // An
-																				// Array
-																				// for
-																				// each
-																				// line
-																				// in
-																				// the
-																				// multiplication.
-																				// once
-																				// these
-																				// are
-																				// filled,
-																				// they
-																				// will
-																				// be
-																				// added
-																				// together.
+                }
 
-						byte[][] temparray = new byte[digits - 1][finalprod.length];
+                Collections.reverse(digarray);
+                curind = x;
 
-						if (digits > 1) {
+                for (int mainind = 0; mainind < n; mainind++) {
 
-							for (int init = 0; init < finalprod.length; init++) {
+                    if (notStopped) {
 
-								for (int lineind = 0; lineind < digits; lineind++) {
+                        // Pause/Resume Calculation
 
-									lines[lineind][init] = finalprod[init]; // initialize
-																			// lines
-																			// with
-																			// value
-																			// of
-																			// finalprod
+                        while (isPaused) {
 
-								}
+                            Thread.sleep(100);
 
-							}
+                        }
 
-							// fill lines
-							for (int z = 0; z < digits; z++) {
+                        byte[][] lines = new byte[digits][finalprod.length];
 
-								{
-									while (// zerocount < 100 &&
-									i >= 0) {
+                        byte[][] temparray = new byte[digits - 1][finalprod.length];
 
-										digprod = lines[z][i] * digarray.get(z);
+                        if (digits > 1) {
 
-										lines[z][i] = (byte) ((digprod % 10 + carryover) % 10);
-										carryover = (digprod + carryover) / 10;
+                            for (int init = 0; init < finalprod.length; init++) {
 
-										if (i > 2 && lines[z][i] == 0
-												&& lines[z][i - 1] == 0
-												&& lines[z][i - 2] == 0
-												&& lines[z][i - 3] == 0) {
+                                for (int lineind = 0; lineind < digits; lineind++) {
 
-											// zerocount++;
+                                    lines[lineind][init] = finalprod[init];
 
-										}
+                                }
 
-										i--;
-									}
+                            }
 
-									carryover = 0;
-									// zerocount = 0;
-									i = finalprod.length - 1;
+                            // fill lines
+                            for (int z = 0; z < digits; z++) {
 
-								}
+                                {
+                                    while (// zerocount < 100 &&
+                                    i >= 0) {
 
-								if (digarray.get(z) == 0) {
+                                        digprod = lines[z][i] * digarray.get(z);
 
-									for (int run = 0; run < finalprod.length; run++) {
+                                        lines[z][i] = (byte) ((digprod % 10 + carryover) % 10);
+                                        carryover = (digprod + carryover) / 10;
 
-										lines[z][run] = 0;
+                                        if (i > 2 && lines[z][i] == 0
+                                                && lines[z][i - 1] == 0
+                                                && lines[z][i - 2] == 0
+                                                && lines[z][i - 3] == 0) {
 
-									}
+                                            // zerocount++;
 
-								}
+                                        }
 
-							}
+                                        i--;
+                                    }
 
-							// Store value of lines[0 to digits -2][init] in
-							// temparray
+                                    carryover = 0;
+                                    // zerocount = 0;
+                                    i = finalprod.length - 1;
 
-							for (int init = 0; init < finalprod.length; init++) {
+                                }
 
-								for (int tempind = 0; tempind < digits - 1; tempind++) {
+                                if (digarray.get(z) == 0) {
 
-									temparray[tempind][init] = lines[tempind][init];
+                                    for (int run = 0; run < finalprod.length; run++) {
 
-								}
+                                        lines[z][run] = 0;
 
-							}
-							// add necessary zeros to each line array in lines
-							// at beginning
+                                    }
 
-							for (int q = 0; q < digits - 1; q++) {
+                                }
 
-								for (int zeroind = digits - q - 1; zeroind >= 0; zeroind--) {
+                            }
 
-									lines[q][finalprod.length - 1 - zeroind] = 0;
+                            // Store value of lines[0 to digits -2][init] in
+                            // temparray
 
-								}
+                            for (int init = 0; init < finalprod.length; init++) {
 
-								for (int index = finalprod.length
-										- (digits - q); index >= 0; index--) {
+                                for (int tempind = 0; tempind < digits - 1; tempind++) {
 
-									lines[q][index] = temparray[q][index
-											+ (digits - q - 1)];
+                                    temparray[tempind][init] = lines[tempind][init];
 
-								}
+                                }
 
-							}
+                            }
+                            // add necessary zeros to each line array in lines
+                            // at beginning
 
-							// clear finalprod
+                            for (int q = 0; q < digits - 1; q++) {
 
-							for (int init = 0; init < finalprod.length; init++) {
+                                for (int zeroind = digits - q - 1; zeroind >= 0; zeroind--) {
 
-								finalprod[init] = 0;
+                                    lines[q][finalprod.length - 1 - zeroind] = 0;
 
-							}
+                                }
 
-							// add lines together after multiplying and store in
-							// finalprod
+                                for (int index = finalprod.length
+                                        - (digits - q); index >= 0; index--) {
 
-							while (// zerocount < 10 &&
-							i >= 0) {
+                                    lines[q][index] = temparray[q][index
+                                            + (digits - q - 1)];
 
-								for (int digsumind = 0; digsumind < digits; digsumind++) {
+                                }
 
-									digsum += lines[digsumind][i];
+                            }
 
-								}
+                            // clear finalprod
 
-								finalprod[i] = (byte) ((digsum % 10 + sumcarry) % 10);
-								sumcarry = (digsum + sumcarry) / 10;
+                            for (int init = 0; init < finalprod.length; init++) {
 
-								/*
-								 * for (int digsumind = 0; digsumind < digits;
-								 * digsumind++) {
-								 * 
-								 * if (i > 2 && lines[digsumind][i] == 0 &&
-								 * lines[digsumind][i - 1] == 0 &&
-								 * lines[digsumind][i - 2] == 0 &&
-								 * lines[digsumind][i - 3] == 0) {
-								 * 
-								 * zerook = true;
-								 * 
-								 * } else {
-								 * 
-								 * zerook = false;
-								 * 
-								 * }
-								 * 
-								 * }
-								 * 
-								 * if (zerook) {
-								 * 
-								 * zerocount++;
-								 * 
-								 * }
-								 * 
-								 * if (!zerook) {
-								 * 
-								 * zerocount = 0;
-								 * 
-								 * }
-								 */
+                                finalprod[init] = 0;
 
-								i--;
-								// zerook = false;
-								digsum = 0;
-							}
+                            }
 
-							sumcarry = 0;
-							// zerocount = 0;
-							i = finalprod.length - 1;
+                            // add lines together after multiplying and store in
+                            // finalprod
 
-						} else {
+                            while (// zerocount < 10 &&
+                            i >= 0) {
 
-							while (// zerocount < 100 &&
-							i >= 0) {
+                                for (int digsumind = 0; digsumind < digits; digsumind++) {
 
-								digprod = finalprod[i] * curind;
+                                    digsum += lines[digsumind][i];
 
-								finalprod[i] = (byte) ((digprod % 10 + carryover) % 10);
-								carryover = (digprod + carryover) / 10;
+                                }
 
-								/*
-								 * if (i > 2 && finalprod[i] == 0 && finalprod[i
-								 * - 1] == 0 && finalprod[i - 2] == 0 &&
-								 * finalprod[i - 3] == 0) {
-								 * 
-								 * zerocount++;
-								 * 
-								 * }
-								 */
+                                finalprod[i] = (byte) ((digsum % 10 + sumcarry) % 10);
+                                sumcarry = (digsum + sumcarry) / 10;
 
-								i--;
-							}
+                                i--;
+                                // zerook = false;
+                                digsum = 0;
+                            }
 
-							carryover = 0;
-							// zerocount = 0;
-							i = finalprod.length - 1;
+                            sumcarry = 0;
+                            // zerocount = 0;
+                            i = finalprod.length - 1;
 
-						}
+                        } else {
 
-						/*
-						 * // ---------------Optimization Algorithm v 1.0
-						 * continues // here:-----
-						 * 
-						 * // multiply end result with remaining factors:
-						 * xOld^nr if (mainind == n - 1 && needsOptimization &&
-						 * !optimized) {
-						 * 
-						 * mainind = 0; n = 2; x = xr; optimized = true;
-						 * 
-						 * }
-						 * 
-						 * // ---------------Optimization Algorithm ends //
-						 * here------------------
-						 */
+                            while (// zerocount < 100 &&
+                            i >= 0) {
 
-					} else {
+                                digprod = finalprod[i] * curind;
 
-						break;
+                                finalprod[i] = (byte) ((digprod % 10 + carryover) % 10);
+                                carryover = (digprod + carryover) / 10;
 
-					}
+                                i--;
+                            }
 
-				}
-			}
+                            carryover = 0;
+                            // zerocount = 0;
+                            i = finalprod.length - 1;
 
-			// Calculate runtime
+                        }
 
-			long endTime = System.currentTimeMillis();
-			long totalTime = endTime - startTime;
+                        /*
+                         * // ---------------Optimization Algorithm v 1.0
+                         * continues // here:-----
+                         * 
+                         * // multiply end result with remaining factors:
+                         * xOld^nr if (mainind == n - 1 && needsOptimization &&
+                         * !optimized) {
+                         * 
+                         * mainind = 0; n = 2; x = xr; optimized = true;
+                         * 
+                         * }
+                         * 
+                         * // ---------------Optimization Algorithm ends //
+                         * here------------------
+                         */
 
-			// Subtract pause and resume intervals from totalTime
+                    } else {
 
-			for (int t = 0; t < pauseTimes.size(); t++) {
+                        break;
 
-				totalTime -= (resumeTimes.get(t) - pauseTimes.get(t));
+                    }
 
-			}
+                }
+            }
 
-			if (notStopped) {
+            // Calculate runtime
 
-				// Give x and n the original value they had initially. Print the
-				// String: "x^n"
+            long endTime = System.currentTimeMillis();
+            long totalTime = endTime - startTime;
 
-				x = xcopy;
-				// n = nOld;
+            // Subtract pause and resume intervals from totalTime
 
-				int finalsum = 0;
-				List<Byte> finalprodarray = new ArrayList<Byte>();
+            for (int t = 0; t < pauseTimes.size(); t++) {
 
-				System.out.print(x + "");
+                totalTime -= (resumeTimes.get(t) - pauseTimes.get(t));
 
-				for (int z : ndigits) {
+            }
 
-					if (z == 0) {
+            if (notStopped) {
 
-						System.out.print("'");
+                // Give x and n the original value they had initially. Print the
+                // String: "x^n"
 
-					} else if (z == 1) {
+                x = xcopy;
+                // n = nOld;
 
-						System.out.print("¹");
+                int finalsum = 0;
+                List<Byte> finalprodarray = new ArrayList<Byte>();
 
-					} else if (z == 2) {
+                System.out.print(x + "");
 
-						System.out.print("²");
+                for (int z : ndigits) {
 
-					} else if (z == 3) {
+                    if (z == 0) {
 
-						System.out.print("³");
+                        System.out.print("'");
 
-					} else if (z == 4) {
+                    } else if (z == 1) {
 
-						System.out.print("!");
+                        System.out.print("¹");
 
-					} else if (z == 5) {
+                    } else if (z == 2) {
 
-						System.out.print("\"");
+                        System.out.print("²");
 
-					} else if (z == 6) {
+                    } else if (z == 3) {
 
-						System.out.print("#");
+                        System.out.print("³");
 
-					} else if (z == 7) {
+                    } else if (z == 4) {
 
-						System.out.print("$");
+                        System.out.print("!");
 
-					} else if (z == 8) {
+                    } else if (z == 5) {
 
-						System.out.print("%");
+                        System.out.print("\"");
 
-					} else {
+                    } else if (z == 6) {
 
-						System.out.print("&");
+                        System.out.print("#");
 
-					}
+                    } else if (z == 7) {
 
-				}
+                        System.out.print("$");
 
-				System.out.println(" =");
-				System.out.println();
+                    } else if (z == 8) {
 
-				int trailzeroes = 0;
+                        System.out.print("%");
 
-				// If x^n does not only contain powers of 10, remove all the
-				// excess trailing zeroes in the final product ArrayList
+                    } else {
 
-				if (Math.log10(x) != (int) Math.log10(x)) {
+                        System.out.print("&");
 
-					// When x^n does not only contain powers of 10, calculate
-					// the sum of digits in x^n and store its value in an
-					// ArrayList
+                    }
 
-					for (int a = finalprod.length - 1; a >= 0; a--) {
+                }
 
-						finalsum += finalprod[a];
+                System.out.println(" =");
+                System.out.println();
 
-						// transfer the contents of finalprod to an ArrayList,
-						// finalprodarray
+                int trailzeroes = 0;
 
-						finalprodarray.add(finalprod[a]);
+                // If x^n does not only contain powers of 10, remove all the
+                // excess trailing zeroes in the final product ArrayList
 
-					}
+                if (Math.log10(x) != (int) Math.log10(x)) {
 
-					Collections.reverse(finalprodarray);
+                    // When x^n does not only contain powers of 10, calculate
+                    // the sum of digits in x^n and store its value in an
+                    // ArrayList
 
-					while (finalprodarray.get(0) == 0
-							&& finalprodarray.get(1) == 0) {
+                    for (int a = finalprod.length - 1; a >= 0; a--) {
 
-						finalprodarray.remove(0);
+                        finalsum += finalprod[a];
 
-					}
+                        // transfer the contents of finalprod to an ArrayList,
+                        // finalprodarray
 
-					finalprodarray.remove(0);
+                        finalprodarray.add(finalprod[a]);
 
-					// Add back the number of trailing zeroes x^n is supposed to
-					// have if x contains factors of 10
+                    }
 
-					for (int b = 0; b < facTens * n; b++) {
+                    Collections.reverse(finalprodarray);
 
-						finalprodarray.add((byte) 0);
-						trailzeroes++;
+                    while (finalprodarray.get(0) == 0
+                            && finalprodarray.get(1) == 0) {
 
-					}
+                        finalprodarray.remove(0);
 
-				} else {
+                    }
 
-					finalprodarray.clear();
+                    finalprodarray.remove(0);
 
-					for (int q = 0; q < digitsFinal - 1; q++) {
+                    // Add back the number of trailing zeroes x^n is supposed to
+                    // have if x contains factors of 10
 
-						finalprodarray.add((byte) 0);
+                    for (int b = 0; b < facTens * n; b++) {
 
-					}
+                        finalprodarray.add((byte) 0);
+                        trailzeroes++;
 
-					finalprodarray.add((byte) 1);
-					Collections.reverse(finalprodarray);
+                    }
 
-					// When x^n does contains only a power of 10, the sum of the
-					// digits in x^n is 1
-					finalsum = 1;
+                } else {
 
-				}
+                    finalprodarray.clear();
 
-				// Print the calculated value of x^n
+                    for (int q = 0; q < digitsFinal - 1; q++) {
 
-				int charcount = 0;
+                        finalprodarray.add((byte) 0);
 
-				for (int a = 0; a < finalprodarray.size(); a++) {
+                    }
 
-					if (charcount == 44) {
+                    finalprodarray.add((byte) 1);
+                    Collections.reverse(finalprodarray);
 
-						System.out.println();
-						charcount = 0;
+                    // When x^n does contains only a power of 10, the sum of the
+                    // digits in x^n is 1
+                    finalsum = 1;
 
-					}
+                }
 
-					System.out.print(finalprodarray.get(a));
-					charcount++;
+                // Print the calculated value of x^n
 
-				}
+                int charcount = 0;
 
-				// Print the sum of digits in x^n
+                for (int a = 0; a < finalprodarray.size(); a++) {
 
-				System.out.println();
-				System.out.println();
-				System.out.print("The sum of the digits in " + x);
+                    if (charcount == 44) {
 
-				for (int z : ndigits) {
+                        System.out.println();
+                        charcount = 0;
 
-					if (z == 0) {
+                    }
 
-						System.out.print("'");
+                    System.out.print(finalprodarray.get(a));
+                    charcount++;
 
-					} else if (z == 1) {
+                }
 
-						System.out.print("¹");
+                // Print the sum of digits in x^n
 
-					} else if (z == 2) {
+                System.out.println();
+                System.out.println();
+                System.out.print("The sum of the digits in " + x);
 
-						System.out.print("²");
+                for (int z : ndigits) {
 
-					} else if (z == 3) {
+                    if (z == 0) {
 
-						System.out.print("³");
+                        System.out.print("'");
 
-					} else if (z == 4) {
+                    } else if (z == 1) {
 
-						System.out.print("!");
+                        System.out.print("¹");
 
-					} else if (z == 5) {
+                    } else if (z == 2) {
 
-						System.out.print("\"");
+                        System.out.print("²");
 
-					} else if (z == 6) {
+                    } else if (z == 3) {
 
-						System.out.print("#");
+                        System.out.print("³");
 
-					} else if (z == 7) {
+                    } else if (z == 4) {
 
-						System.out.print("$");
+                        System.out.print("!");
 
-					} else if (z == 8) {
+                    } else if (z == 5) {
 
-						System.out.print("%");
+                        System.out.print("\"");
 
-					} else {
+                    } else if (z == 6) {
 
-						System.out.print("&");
+                        System.out.print("#");
 
-					}
+                    } else if (z == 7) {
 
-				}
+                        System.out.print("$");
 
-				System.out.print(" = " + finalsum);
-				System.out.println();
-				System.out.println();
+                    } else if (z == 8) {
 
-				// Print the # of trailing zeroes in x^n
+                        System.out.print("%");
 
-				if (trailzeroes > 0) {
+                    } else {
 
-					System.out.print("The number of trailing zeroes in " + x);
+                        System.out.print("&");
 
-					for (int z : ndigits) {
+                    }
 
-						if (z == 0) {
+                }
 
-							System.out.print("'");
+                System.out.print(" = " + finalsum);
+                System.out.println();
+                System.out.println();
 
-						} else if (z == 1) {
+                // Print the # of trailing zeroes in x^n
 
-							System.out.print("¹");
+                if (trailzeroes > 0) {
 
-						} else if (z == 2) {
+                    System.out.print("The number of trailing zeroes in " + x);
 
-							System.out.print("²");
+                    for (int z : ndigits) {
 
-						} else if (z == 3) {
+                        if (z == 0) {
 
-							System.out.print("³");
+                            System.out.print("'");
 
-						} else if (z == 4) {
+                        } else if (z == 1) {
 
-							System.out.print("!");
+                            System.out.print("¹");
 
-						} else if (z == 5) {
+                        } else if (z == 2) {
 
-							System.out.print("\"");
+                            System.out.print("²");
 
-						} else if (z == 6) {
+                        } else if (z == 3) {
 
-							System.out.print("#");
+                            System.out.print("³");
 
-						} else if (z == 7) {
+                        } else if (z == 4) {
 
-							System.out.print("$");
+                            System.out.print("!");
 
-						} else if (z == 8) {
+                        } else if (z == 5) {
 
-							System.out.print("%");
+                            System.out.print("\"");
 
-						} else {
+                        } else if (z == 6) {
 
-							System.out.print("&");
+                            System.out.print("#");
 
-						}
-					}
+                        } else if (z == 7) {
 
-					System.out.print(" is " + trailzeroes);
-					System.out.println();
-					System.out.println();
+                            System.out.print("$");
 
-				}
-			}
+                        } else if (z == 8) {
 
-			// Print Runtime
+                            System.out.print("%");
 
-			System.out.println("Runtime: " + totalTime + " ms");
-			System.out.println();
+                        } else {
 
-			pauseTimes.clear();
-			resumeTimes.clear();
-			isPaused = false;
+                            System.out.print("&");
 
-		} catch (Exception e1) {
+                        }
+                    }
 
-			System.out
-					.println("Not enough memory available to perform calculation.");
-			System.out.println();
-			isPaused = false;
+                    System.out.print(" is " + trailzeroes);
+                    System.out.println();
+                    System.out.println();
 
-		} catch (OutOfMemoryError e2) {
+                }
+            }
 
-			System.out
-					.println("Not enough memory available to perform calculation.");
-			System.out.println();
-			isPaused = false;
+            // Print Runtime
 
-		}
-	}
+            System.out.println("Runtime: " + totalTime + " ms");
+            System.out.println();
 
-	public static void Stop() {
+            pauseTimes.clear();
+            resumeTimes.clear();
+            isPaused = false;
 
-		notStopped = false;
-		isPaused = false;
+        } catch (Exception e1) {
 
-	}
+            System.out
+                    .println("Not enough memory available to perform calculation.");
+            System.out.println();
+            isPaused = false;
 
-	public static void Reinitialize() {
+        } catch (OutOfMemoryError e2) {
 
-		notStopped = true;
-		isPaused = false;
+            System.out
+                    .println("Not enough memory available to perform calculation.");
+            System.out.println();
+            isPaused = false;
 
-	}
+        }
+    }
 
-	public static void Pause() {
+    public static void Stop() {
 
-		pauseTimes.add(System.currentTimeMillis());
-		isPaused = true;
+        notStopped = false;
+        isPaused = false;
 
-	}
+    }
 
-	public static void Resume() {
+    public static void Reinitialize() {
 
-		resumeTimes.add(System.currentTimeMillis());
-		isPaused = false;
+        notStopped = true;
+        isPaused = false;
 
-	}
+    }
+
+    public static void Pause() {
+
+        pauseTimes.add(System.currentTimeMillis());
+        isPaused = true;
+
+    }
+
+    public static void Resume() {
+
+        resumeTimes.add(System.currentTimeMillis());
+        isPaused = false;
+
+    }
 
 }

@@ -12,8 +12,6 @@ The GUI including all graphical assets and sounds were created by me. However, t
 
 <p align="center"><img src ="https://cloud.githubusercontent.com/assets/16710726/22317415/83fca8c4-e341-11e6-8d1d-ef6d8488688a.jpg" /></p>
 
-<p align="center"><img src ="https://cloud.githubusercontent.com/assets/16710726/22317414/83fc90e6-e341-11e6-99b9-995c56b72b83.jpg" /></p>
-
 ## Open-Source
 Note that this software is licensed under the MIT public license, meaning that this software is open-source. Please disregard the EULA
 embedded in the software as it is inactive.

@@ -5,7 +5,7 @@ Please see my blog at https://chaitanyavarier.com/2015/08/03/the-little-array-th
 ## GUI
 The application features an intuitive and robust GUI which was solely developed using the Swing API. The GUI includes custom icons and sounds.
 
-I created the GUI including all graphical assets and sounds from scratch and everyone is welcome to use them under the terms of the MIT license.
+I created the GUI including all graphical assets and sounds from scratch. Anyone is welcome to use them under the terms of the MIT license.
 
 ## Screenshots
 <p align="center"><img src ="https://cloud.githubusercontent.com/assets/16710726/22317413/83f91e84-e341-11e6-9295-39e365957dfe.jpg" /></p>
